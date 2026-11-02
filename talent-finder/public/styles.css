@@ -1,0 +1,91 @@
+/* styles.css — calm, readable, high-contrast. Polish comes in Step 5. */
+
+:root {
+  --bg: #f7f6f2;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #5b616b;
+  --accent: #2f6f5e;
+  --accent-text: #ffffff;
+  --bot: #e9f2ef;
+  --user: #eef0f6;
+  --warn-bg: #fff4e0;
+  --border: #d6d8dc;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 18px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+h1 { margin: 0 0 16px; color: var(--accent); }
+
+.lead { font-size: 1.15rem; }
+
+.notice {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 16px 0;
+}
+.notice ul { margin: 8px 0 0; padding-left: 20px; }
+
+.warning {
+  background: var(--warn-bg);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.actions, .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+
+button {
+  font: inherit;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button:focus-visible, textarea:focus-visible { outline: 3px solid #f0a500; outline-offset: 2px; }
+button.listening { background: #b3261e; color: #fff; border-color: #b3261e; }
+
+.status { color: var(--muted); min-height: 1.5em; }
+
+.transcript {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; }
+.msg.bot { background: var(--bot); }
+.msg.user { background: var(--user); margin-left: 15%; }
+.msg .who { display: block; font-size: 0.8rem; color: var(--muted); }
+
+.caption { font-style: italic; color: var(--muted); }
+
+.text-form label { display: block; margin-bottom: 4px; color: var(--muted); }
+.text-form .row { display: flex; gap: 8px; }
+.text-form textarea {
+  flex: 1;
+  font: inherit;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  resize: vertical;
+}

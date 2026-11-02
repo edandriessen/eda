@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Talent Finder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <h1>Talent Finder</h1>
+
+    <!-- ===== Screen 1: Welcome ===== -->
+    <section id="screen-welcome" class="screen">
+      <p class="lead">A short, friendly conversation about your experience. At the end, you'll see skills you may not realize you have.</p>
+
+      <div class="notice" role="note">
+        <strong>Your privacy</strong>
+        <ul>
+          <li>Talent Finder <strong>does not save</strong> your answers. Close this tab and they're gone.</li>
+          <li>For voice, your browser's speech service turns your voice into text. (In Chrome and Edge that's Google or Microsoft; in Safari it's Apple.) Prefer not to? Choose <em>Type instead</em>.</li>
+        </ul>
+      </div>
+
+      <p id="support-msg" class="warning" hidden></p>
+
+      <div class="actions">
+        <button id="btn-start-voice" class="primary">Start voice interview</button>
+        <button id="btn-start-text">Type instead</button>
+      </div>
+    </section>
+
+    <!-- ===== Screen 2: Interview ===== -->
+    <section id="screen-interview" class="screen" hidden>
+      <p id="status" class="status" aria-live="polite">Getting ready…</p>
+
+      <!-- Transcript: everything the bot and the user say, in order -->
+      <div id="transcript" class="transcript" role="log" aria-live="polite" aria-label="Conversation transcript"></div>
+
+      <!-- Live captions while the user is speaking -->
+      <p id="caption" class="caption" aria-live="off" hidden></p>
+
+      <div class="controls">
+        <button id="btn-mic" hidden>🎤 Answer by voice</button>
+        <button id="btn-done" hidden>I'm done answering</button>
+        <button id="btn-repeat">Repeat</button>
+        <button id="btn-skip">Skip</button>
+        <button id="btn-pause">Pause</button>
+      </div>
+
+      <form id="text-form" class="text-form">
+        <label for="text-input">Or type your answer:</label>
+        <div class="row">
+          <textarea id="text-input" rows="2" placeholder="Type here and press Enter"></textarea>
+          <button type="submit" class="primary">Send</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== Screen 3: Done (Step 2 placeholder; real results come in Step 4) ===== -->
+    <section id="screen-done" class="screen" hidden>
+      <h2>Thanks! Here's what you said</h2>
+      <p>In the full version, this is where your hidden talents and resume bullets will appear.</p>
+      <ol id="answers"></ol>
+      <button id="btn-restart">Start over</button>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
