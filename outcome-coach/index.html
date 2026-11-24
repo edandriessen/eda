@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outcome Builder: From Task to Clear Outcome</title>
+<style>
+  :root {
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --ink: #1f2a2e;
+    --muted: #66767c;
+    --line: #dde4e2;
+    --accent: #2f6f6a;
+    --accent-dark: #245853;
+    --accent-soft: #e6f0ee;
+    --nudge-bg: #fff7e6;
+    --nudge-line: #f0d9a8;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    font-size: 17px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 18px 48px; }
+  header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  header.top h1 { font-size: 1.15rem; margin: 0; font-weight: 600; letter-spacing: .01em; }
+  header.top .tag { font-size: .85rem; color: var(--muted); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 6px 24px rgba(31,42,46,.05);
+  }
+
+  /* Progress */
+  .progress { margin-bottom: 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .35s ease; }
+
+  .eyebrow { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 600; margin: 0 0 6px; }
+  h2.q { font-size: 1.45rem; line-height: 1.3; margin: 0 0 14px; font-weight: 600; }
+  .why, .example { font-size: .92rem; color: var(--muted); margin: 0 0 6px; }
+  .why strong, .example strong { color: #4e5d62; font-weight: 600; }
+  .example { margin-bottom: 18px; font-style: italic; }
+  .example strong { font-style: normal; }
+
+  label.sub { display: block; font-size: .9rem; font-weight: 600; margin: 12px 0 4px; }
+  textarea, input[type="text"] {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: #fbfcfc;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  textarea { min-height: 110px; resize: vertical; }
+  textarea:focus, input[type="text"]:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff;
+  }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+
+  .nudge {
+    background: var(--nudge-bg);
+    border: 1px solid var(--nudge-line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: .95rem;
+  }
+  .nudge p { margin: 0 0 8px; }
+  .nudge .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .error { color: #a2412f; font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .nav .right { display: flex; gap: 10px; margin-left: auto; }
+
+  button {
+    font: inherit; font-size: .95rem; cursor: pointer;
+    border-radius: 10px; padding: 10px 18px; border: 1.5px solid transparent;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  button.primary { background: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-dark); }
+  button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+  button.link { background: none; border: none; color: var(--muted); padding: 10px 6px; text-decoration: underline; }
+  button.link:hover { color: var(--accent); }
+  button.small { padding: 6px 12px; font-size: .85rem; }
+  button:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+  button[disabled] { opacity: .45; cursor: default; }
+
+  /* Intro */
+  .intro p { margin: 0 0 12px; }
+  .intro ul { margin: 0 0 16px; padding-left: 20px; color: #3d4b50; }
+  .privacy { font-size: .85rem; color: var(--muted); }
+
+  /* Summary */
+  .statement {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 6px 0 8px;
+  }
+  .statement:focus { outline: 2px solid var(--accent); }
+  .answers { margin-top: 26px; }
+  .answer { border-top: 1px solid var(--line); padding: 14px 0; }
+  .answer-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .answer h3 { font-size: .95rem; margin: 0; color: var(--accent); }
+  .answer .body { margin: 6px 0 0; white-space: pre-wrap; }
+  .answer .body.skipped { color: var(--muted); font-style: italic; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .toast { font-size: .9rem; color: var(--accent); min-height: 1.3em; margin-top: 8px; }
+
+  .hidden { display: none !important; }
+  .fade { animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    header.top .tag { display: none; }
+    .card { padding: 22px 18px; }
+    h2.q { font-size: 1.25rem; }
+    .nav .right { width: 100%; }
+    .nav .right button { flex: 1; }
+  }
+
+  @media print {
+    body { background: #fff; font-size: 12pt; }
+    .wrap { max-width: none; padding: 0; }
+    .card { border: none; box-shadow: none; padding: 0; }
+    .no-print, header.top .tag { display: none !important; }
+    .statement { background: #f2f2f2; border-left-color: #333; }
+    .answer h3 { color: #000; }
+    .answer { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Outcome Builder</h1>
+    <span class="tag">From "what I have to do" to "what done well looks like"</span>
+  </header>
+
+  <main class="card" id="app" aria-live="polite"></main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Question definitions ----------
+  const QUESTIONS = [
+    {
+      id: "task",
+      title: "The task",
+      q: "What task or project are you working on?",
+      why: "Naming it gives us a clear place to start.",
+      example: "Rolling out the new incident-reporting process to my shift supervisors.",
+      fields: [{ key: "task", type: "textarea" }]
+    },
+    {
+      id: "positive",
+      title: "What you want",
+      q: "What do you want to have happen as a result?",
+      why: "Your mind moves toward what you picture, so picture what you want, not what you're trying to avoid.",
+      example: "Every supervisor filing incident reports through the new system within 24 hours.",
+      tip: "It helps if your answer finishes the sentence \"I will have...\"",
+      fields: [{ key: "positive", type: "textarea" }],
+      check: "negation"
+    },
+    {
+      id: "context",
+      title: "Where, when, and with whom",
+      q: "Where, when, and with whom do you want this outcome?",
+      why: "A goal tied to a real time and place is one you can actually plan for.",
+      example: "When: by March 31. Where: at the Trenton plant. With whom: my six shift supervisors.",
+      fields: [
+        { key: "when", type: "text", label: "When?", placeholder: "e.g., by March 31" },
+        { key: "where", type: "text", label: "Where?", placeholder: "e.g., at the Trenton plant" },
+        { key: "who", type: "text", label: "With whom?", placeholder: "e.g., my six shift supervisors" }
+      ]
+    },
+    {
+      id: "evidence",
+      title: "How you'll know",
+      q: "How will you know you've achieved it? What will you see, hear, and feel?",
+      why: "If you can't see or hear the result, you can't tell when you're done.",
+      example: "I'll see all reports in the dashboard on time, hear supervisors walking new hires through it, and feel relaxed at our Monday review.",
+      fields: [{ key: "evidence", type: "textarea" }]
+    },
+    {
+      id: "control",
+      title: "Within your control",
+      q: "Which part of this can you start and keep going yourself?",
+      why: "You can only steer what's in your hands. That's where your energy pays off.",
+      example: "I can run the training, check the dashboard every Friday, and coach anyone who falls behind.",
+      fields: [{ key: "control", type: "textarea" }],
+      check: "control"
+    },
+    {
+      id: "resources",
+      title: "Resources",
+      q: "What resources do you already have, such as skills, people, time, and past successes? What else do you need?",
+      why: "You likely have more going for you than you think. Spotting gaps early keeps you moving.",
+      example: "Have: I led the last safety rollout, IT support, and a training room. Need: 30 minutes on the supervisors' meeting agenda.",
+      fields: [{ key: "resources", type: "textarea" }]
+    },
+    {
+      id: "ecology",
+      title: "Gains, losses, and what to keep",
+      q: "What might you gain or lose by reaching this outcome? Is there anything about the current situation you want to keep?",
+      why: "Goals stick when they fit the rest of your work and life. This catches hidden costs.",
+      example: "Gain: cleaner data and fewer surprises. Lose: some evenings for two weeks. Keep: the informal hallway check-ins people like.",
+      fields: [{ key: "ecology", type: "textarea" }],
+      skippable: true
+    },
+    {
+      id: "purpose",
+      title: "Bigger purpose",
+      q: "When you achieve this, what will it do for you, your team, or your organization?",
+      why: "Knowing the \"why\" keeps you going when it gets hard.",
+      example: "We'll spot safety trends sooner, pass our audit with confidence, and I'll have a clear win to point to.",
+      fields: [{ key: "purpose", type: "textarea" }],
+      skippable: true
+    },
+    {
+      id: "first",
+      title: "First step",
+      q: "What's the very first action you'll take, and when?",
+      why: "A small, dated first step turns a good intention into motion.",
+      example: "Action: email the supervisors to book a 45-minute training slot. When: Tuesday at 9 a.m.",
+      fields: [
+        { key: "action", type: "text", label: "Your first action", placeholder: "e.g., email supervisors to book a training slot" },
+        { key: "actionDate", type: "text", label: "When?", placeholder: "e.g., Tuesday at 9 a.m." }
+      ]
+    }
+  ];
+
+  const TOTAL = QUESTIONS.length;
+
+  // ---------- State (memory only) ----------
+  let state;
+  function freshState() {
+    return {
+      screen: "intro",      // "intro" | number (0-8) | "summary"
+      answers: {},          // key -> string
+      skipped: {},          // question id -> true
+      nudged: {},           // question id -> true (nudge already shown for current text)
+      returnToSummary: false
+    };
+  }
+  state = freshState();
+
+  const app = document.getElementById("app");
+
+  // ---------- Helpers ----------
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function val(key) { return (state.answers[key] || "").trim(); }
+
+  // Negation check for "stated in the positive"
+  const NEGATION_RE = /\b(not|stop|stops|stopped|stopping|avoid|avoids|avoiding|less|fewer|don't|dont|doesn't|won't|can't|never|no more|no longer|quit|eliminate|get rid of|without)\b|n't\b/i;
+  function hasNegation(text) { return NEGATION_RE.test(text); }
+
+  // Rough check: does the answer lean mainly on other people?
+  const OTHERS_RE = /\b(they|them|their|he|she|his|her|others|other people|everyone|everybody|my boss|my manager|leadership|management|the team will|team needs to|if (they|he|she|my|the)|get (them|him|her|people)|make (them|him|her|people)|depends on|waiting (on|for)|up to (them|him|her))\b/i;
+  function leansOnOthers(text) {
+    const othersHits = (text.match(new RegExp(OTHERS_RE.source, "gi")) || []).length;
+    const selfHits = (text.match(/\b(I|I'll|I will|I can|I'm|myself)\b/g) || []).length;
+    return othersHits > 0 && othersHits >= selfHits;
+  }
+
+  // Light cleanup so the outcome statement reads naturally
+  function cleanOutcome(t) {
+    t = t.trim().replace(/[.!\s]+$/, "");
+    t = t.replace(/^(i\s+(really\s+)?(want|would like|need|hope|wish)\s+(to\s+)?(have\s+)?)/i, "");
+    t = t.replace(/^(to\s+have\s+|to\s+)/i, "");
+    return lowerFirst(t);
+  }
+  function cleanEvidence(t) {
+    t = t.trim().replace(/[.!\s]+$/, "");
+    t = t.replace(/^(i('|’)ll|i will)\s+know\s+(because|when|by|that)\s+/i, "");
+    t = t.replace(/^(because|when)\s+/i, "");
+    return lowerFirst(t);
+  }
+  function cleanPhrase(t) {
+    return lowerFirst(t.trim().replace(/[.!\s]+$/, ""));
+  }
+  function cleanWhen(t) {
+    t = cleanPhrase(t).replace(/^by\s+/i, "");
+    return t;
+  }
+  function cleanWhere(t) {
+    t = cleanPhrase(t);
+    return /^(in|at|on|during|across|throughout|within)\s/i.test(t) ? t : "in " + t;
+  }
+  function cleanWho(t) {
+    return cleanPhrase(t).replace(/^with\s+/i, "");
+  }
+  function cleanDate(t) {
+    return cleanPhrase(t).replace(/^on\s+/i, "");
+  }
+  // Lowercase the first word only if it's a common word (keeps names and acronyms intact)
+  const COMMON_START = /^(the|a|an|my|our|every|each|all|everyone|everybody|we|people|staff|team|teams|it|this|that|these|those|there|when|by|in|at|on|with|to|have|send|call|email|schedule|book|write|draft|meet|ask|set|start|review|create|finish|complete|deliver|run|hold|share|talk|see|hear|feel|i'll|next|this|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i;
+  function lowerFirst(t) {
+    if (!t) return t;
+    const first = t.split(/\s/)[0].replace(/[^A-Za-z']/g, "");
+    if (/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|i'll)$/i.test(first)) return t;
+    if (COMMON_START.test(first)) return t.charAt(0).toLowerCase() + t.slice(1);
+    return t;
+  }
+
+  function buildStatement() {
+    const when = cleanWhen(val("when"));
+    const where = cleanWhere(val("where"));
+    const who = cleanWho(val("who"));
+    const outcome = cleanOutcome(val("positive"));
+    const evidence = cleanEvidence(val("evidence"));
+    const action = cleanPhrase(val("action"));
+    const date = cleanDate(val("actionDate"));
+
+    let context = where;
+    if (who) context += (context ? ", with " : "with ") + who;
+
+    return "By " + when + ", " + context + ", I will have " + outcome +
+      ", and I'll know because " + evidence + ". My first step is to " +
+      action.replace(/^to\s+/i, "") + " on " + date + ".";
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    if (state.screen === "intro") return renderIntro();
+    if (state.screen === "summary") return renderSummary();
+    return renderQuestion(state.screen);
+  }
+
+  function renderIntro() {
+    app.innerHTML = `
+      <div class="intro fade">
+        <p class="eyebrow">Welcome</p>
+        <h2 class="q">You know what you have to do. Let's define what "done well" looks like.</h2>
+        <p>In about 10 minutes, nine short questions will turn a task into a clear outcome you can act on.</p>
+        <ul>
+          <li>One question at a time</li>
+          <li>Short examples to get you started</li>
+          <li>A finished outcome statement you can copy or print</li>
+        </ul>
+        <p class="privacy">Your answers stay on this page. Nothing is saved or sent anywhere, and closing the tab clears everything.</p>
+        <div class="nav">
+          <div class="right"><button class="primary" id="startBtn">Let's begin</button></div>
+        </div>
+      </div>`;
+    const b = document.getElementById("startBtn");
+    b.addEventListener("click", () => go(0));
+    b.focus();
+  }
+
+  function renderQuestion(i) {
+    const Q = QUESTIONS[i];
+    const pct = Math.round(((i + 1) / TOTAL) * 100);
+    const multi = Q.fields.length > 1;
+
+    const fieldsHtml = Q.fields.map((f, idx) => {
+      const id = "f_" + f.key;
+      const value = esc(state.answers[f.key] || "");
+      const label = multi ? `<label class="sub" for="${id}">${esc(f.label)}</label>` :
+        `<label class="sub hidden" for="${id}">${esc(Q.q)}</label>`;
+      if (f.type === "textarea") {
+        return label + `<textarea id="${id}" data-key="${f.key}" placeholder="Type your answer here...">${value}</textarea>`;
+      }
+      return label + `<input type="text" id="${id}" data-key="${f.key}" placeholder="${esc(f.placeholder || "")}" value="${value}" autocomplete="off">`;
+    }).join("");
+
+    const hasTextarea = Q.fields.some(f => f.type === "textarea");
+    const nextLabel = state.returnToSummary ? "Save and return to summary" : (i === TOTAL - 1 ? "See my outcome" : "Next");
+
+    app.innerHTML = `
+      <div class="fade">
+        <div class="progress">
+          <div class="progress-label"><span>Step ${i + 1} of ${TOTAL}</span><span>${esc(Q.title)}</span></div>
+          <div class="bar" role="progressbar" aria-valuemin="1" aria-valuemax="${TOTAL}" aria-valuenow="${i + 1}" aria-label="Step ${i + 1} of ${TOTAL}"><span style="width:${pct}%"></span></div>
+        </div>
+        <h2 class="q">${esc(Q.q)}</h2>
+        <p class="why"><strong>Why this matters:</strong> ${esc(Q.why)}</p>
+        <p class="example"><strong>Example:</strong> ${esc(Q.example)}</p>
+        ${Q.tip ? `<p class="why">${esc(Q.tip)}</p>` : ""}
+        <form id="qForm" novalidate>
+          ${fieldsHtml}
+          ${hasTextarea ? `<div class="hint">Press Enter to continue. Shift + Enter adds a new line.</div>` : `<div class="hint">Press Enter to continue.</div>`}
+          <div id="nudge"></div>
+          <div class="error" id="err" role="alert"></div>
+          <div class="nav">
+            <button type="button" class="ghost" id="backBtn">Back</button>
+            <div class="right">
+              ${Q.skippable ? `<button type="button" class="link" id="skipBtn">Skip this one</button>` : ""}
+              <button type="submit" class="primary" id="nextBtn">${nextLabel}</button>
+            </div>
+          </div>
+        </form>
+      </div>`;
+
+    const form = document.getElementById("qForm");
+    const inputs = form.querySelectorAll("[data-key]");
+
+    inputs.forEach(el => {
+      el.addEventListener("input", () => {
+        state.answers[el.dataset.key] = el.value;
+        // If they change their answer, allow the nudge to re-check it
+        state.nudged[Q.id] = false;
+        document.getElementById("err").textContent = "";
+      });
+      el.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+          e.preventDefault();
+          // In multi-field screens, Enter moves to the next empty field first
+          if (multi) {
+            const list = Array.from(inputs);
+            const pos = list.indexOf(el);
+            const nextEmpty = list.slice(pos + 1).find(x => !x.value.trim());
+            if (el.value.trim() && nextEmpty) { nextEmpty.focus(); return; }
+          }
+          submit(i);
+        }
+      });
+    });
+
+    form.addEventListener("submit", e => { e.preventDefault(); submit(i); });
+    document.getElementById("backBtn").addEventListener("click", () => {
+      if (state.returnToSummary) { state.returnToSummary = false; go("summary"); return; }
+      go(i === 0 ? "intro" : i - 1);
+    });
+    if (Q.skippable) {
+      document.getElementById("skipBtn").addEventListener("click", () => {
+        state.skipped[Q.id] = true;
+        Q.fields.forEach(f => { state.answers[f.key] = ""; });
+        advance(i);
+      });
+    }
+
+    // Focus the first empty field (or first field)
+    const firstEmpty = Array.from(inputs).find(x => !x.value.trim()) || inputs[0];
+    firstEmpty.focus();
+    if (firstEmpty.value) {
+      const len = firstEmpty.value.length;
+      try { firstEmpty.setSelectionRange(len, len); } catch (_) {}
+    }
+  }
+
+  function submit(i) {
+    const Q = QUESTIONS[i];
+    const err = document.getElementById("err");
+    const missing = Q.fields.filter(f => !val(f.key));
+    if (missing.length) {
+      err.textContent = Q.fields.length > 1
+        ? "Please fill in each part before moving on."
+        : (Q.skippable ? "Add a quick answer, or choose \"Skip this one.\"" : "Take a moment and jot down an answer. A rough one is fine.");
+      const el = document.querySelector(`[data-key="${missing[0].key}"]`);
+      if (el) el.focus();
+      return;
+    }
+
+    // Coaching nudges (shown once per version of the answer)
+    if (Q.check && !state.nudged[Q.id]) {
+      const text = val(Q.fields[0].key);
+      if (Q.check === "negation" && hasNegation(text)) {
+        showNudge(Q, "That's what you don't want. What do you want instead?",
+          "Try describing what will be happening when the problem is gone.");
+        return;
+      }
+      if (Q.check === "control" && leansOnOthers(text)) {
+        showNudge(Q, "That sounds like it depends a lot on other people. What part of that can you influence directly?",
+          "Think about what you can say, ask, model, or check yourself.");
+        return;
+      }
+    }
+
+    delete state.skipped[Q.id];
+    advance(i);
+  }
+
+  function showNudge(Q, message, tip) {
+    state.nudged[Q.id] = true;
+    const box = document.getElementById("nudge");
+    box.innerHTML = `
+      <div class="nudge fade" role="status">
+        <p><strong>${esc(message)}</strong></p>
+        <p>${esc(tip)}</p>
+        <div class="row">
+          <button type="button" class="primary small" id="reviseBtn">Revise my answer</button>
+          <button type="button" class="ghost small" id="keepBtn">Keep it and continue</button>
+        </div>
+      </div>`;
+    const field = document.querySelector(`[data-key="${Q.fields[0].key}"]`);
+    document.getElementById("reviseBtn").addEventListener("click", () => {
+      box.innerHTML = "";
+      field.focus();
+      field.select();
+    });
+    document.getElementById("keepBtn").addEventListener("click", () => {
+      delete state.skipped[Q.id];
+      advance(QUESTIONS.indexOf(Q));
+    });
+    document.getElementById("reviseBtn").focus();
+  }
+
+  function advance(i) {
+    if (state.returnToSummary) { state.returnToSummary = false; go("summary"); return; }
+    go(i === TOTAL - 1 ? "summary" : i + 1);
+  }
+
+  function go(screen) {
+    state.screen = screen;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function answerText(Q) {
+    if (state.skipped[Q.id]) return null;
+    if (Q.id === "context") {
+      return "When: " + val("when") + "\nWhere: " + val("where") + "\nWith whom: " + val("who");
+    }
+    if (Q.id === "first") {
+      return "Action: " + val("action") + "\nWhen: " + val("actionDate");
+    }
+    return val(Q.fields[0].key);
+  }
+
+  function renderSummary() {
+    const statement = buildStatement();
+    const answersHtml = QUESTIONS.map((Q, i) => {
+      const t = answerText(Q);
+      return `
+        <div class="answer">
+          <div class="answer-head">
+            <h3>${i + 1}. ${esc(Q.title)}</h3>
+            <button type="button" class="ghost small no-print" data-edit="${i}" aria-label="Edit answer ${i + 1}: ${esc(Q.title)}">Edit</button>
+          </div>
+          <p class="body ${t === null ? "skipped" : ""}">${t === null ? "Skipped" : esc(t)}</p>
+        </div>`;
+    }).join("");
+
+    app.innerHTML = `
+      <div class="fade">
+        <div class="progress no-print">
+          <div class="progress-label"><span>Complete</span><span>Your outcome</span></div>
+          <div class="bar"><span style="width:100%"></span></div>
+        </div>
+        <p class="eyebrow">Your well-formed outcome</p>
+        <h2 class="q">Nice work. Here's what "done well" looks like.</h2>
+        <div class="statement" id="statement" contenteditable="true" spellcheck="true" aria-label="Your outcome statement (you can edit this text)">${esc(statement)}</div>
+        <div class="hint no-print">Want to smooth the wording? Click the statement and edit it directly.</div>
+
+        <div class="actions no-print">
+          <button type="button" class="primary" id="copyBtn">Copy to clipboard</button>
+          <button type="button" class="ghost" id="printBtn">Print</button>
+          <button type="button" class="ghost" id="restartBtn">Start over</button>
+        </div>
+        <div class="toast no-print" id="toast" role="status"></div>
+
+        <div class="answers">
+          <p class="eyebrow">Your answers</p>
+          ${answersHtml}
+        </div>
+      </div>`;
+
+    app.querySelectorAll("[data-edit]").forEach(b => {
+      b.addEventListener("click", () => {
+        state.returnToSummary = true;
+        go(parseInt(b.dataset.edit, 10));
+      });
+    });
+    document.getElementById("copyBtn").addEventListener("click", copyAll);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      if (confirm("Start over? This clears all your answers.")) {
+        state = freshState();
+        render();
+      }
+    });
+    document.getElementById("copyBtn").focus();
+  }
+
+  function plainTextSummary() {
+    const statement = document.getElementById("statement").innerText.trim();
+    let out = "MY OUTCOME\n" + statement + "\n\nMY ANSWERS\n";
+    QUESTIONS.forEach((Q, i) => {
+      const t = answerText(Q);
+      out += "\n" + (i + 1) + ". " + Q.title + "\n" + (t === null ? "(Skipped)" : t) + "\n";
+    });
+    return out;
+  }
+
+  function copyAll() {
+    const text = plainTextSummary();
+    const toast = document.getElementById("toast");
+    const done = () => { toast.textContent = "Copied. Paste it into your notes, email, or calendar."; };
+    const fail = () => { toast.textContent = "Couldn't copy automatically. Select the text and copy it manually."; };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text) ? done() : fail());
+    } else {
+      fallbackCopy(text) ? done() : fail();
+    }
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (_) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
